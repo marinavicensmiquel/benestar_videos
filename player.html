@@ -30,20 +30,49 @@
       cursor: pointer;
       user-select: none;
     }
+
+    .mute-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 10;
+      font-size: 26px;
+      color: white;
+      background: rgba(0,0,0,0.5);
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+    }
   </style>
 </head>
 
 <body>
 
 <div class="back" onclick="goBack()">←</div>
-<video id="videoPlayer" playsinline loop></video>
+<div class="mute-btn" id="muteBtn" onclick="toggleMute()">🔇</div>
+
+<video
+  id="videoPlayer"
+  playsinline
+  autoplay
+  muted
+  loop
+></video>
 
 <script>
   const video = document.getElementById("videoPlayer");
+  const muteBtn = document.getElementById("muteBtn");
+
   let playlists = {};
   let currentPlaylist = [];
   let currentIndex = 0;
   let startY = 0;
+  let isMuted = true;
 
   const params = new URLSearchParams(window.location.search);
   const category = params.get("category");
@@ -52,6 +81,14 @@
     window.location.href = "index.html";
   }
 
+  /* 🔇 / 🔊 Toggle mute */
+  function toggleMute() {
+    isMuted = !isMuted;
+    video.muted = isMuted;
+    muteBtn.textContent = isMuted ? "🔇" : "🔊";
+  }
+
+  /* Load playlists */
   fetch("videos.json")
     .then(res => res.json())
     .then(data => {
@@ -71,7 +108,7 @@
   function playCurrent() {
     video.src = currentPlaylist[currentIndex];
     video.loop = true;
-    video.muted = false;
+    video.muted = isMuted;
 
     video.play().catch(() => {});
   }
@@ -87,6 +124,7 @@
     playCurrent();
   }
 
+  /* Swipe navigation */
   function enableSwipe() {
     document.addEventListener("touchstart", e => {
       startY = e.touches[0].clientY;
@@ -96,8 +134,8 @@
       const endY = e.changedTouches[0].clientY;
       const delta = startY - endY;
 
-      if (delta > 80) nextVideo();
-      if (delta < -80) prevVideo();
+      if (delta > 80) nextVideo();   // swipe up
+      if (delta < -80) prevVideo();  // swipe down
     });
   }
 </script>
