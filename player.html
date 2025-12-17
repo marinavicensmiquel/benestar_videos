@@ -14,10 +14,22 @@
     }
 
     video {
+      position: fixed;
+      inset: 0;
       width: 100vw;
       height: 100vh;
       object-fit: cover;
       background: black;
+      transition: opacity 0.15s ease;
+    }
+
+    .hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .visible {
+      opacity: 1;
     }
 
     .back {
@@ -56,17 +68,16 @@
 <div class="back" onclick="goBack()">←</div>
 <div class="mute-btn" id="muteBtn" onclick="toggleMute()">🔇</div>
 
-<video
-  id="videoPlayer"
-  playsinline
-  autoplay
-  muted
-  loop
-></video>
+<video id="videoA" class="visible" playsinline autoplay muted loop></video>
+<video id="videoB" class="hidden" playsinline autoplay muted loop></video>
 
 <script>
-  const video = document.getElementById("videoPlayer");
+  const videoA = document.getElementById("videoA");
+  const videoB = document.getElementById("videoB");
   const muteBtn = document.getElementById("muteBtn");
+
+  let activeVideo = videoA;
+  let preloadVideo = videoB;
 
   let playlists = {};
   let currentPlaylist = [];
@@ -81,14 +92,13 @@
     window.location.href = "index.html";
   }
 
-  /* 🔇 / 🔊 Toggle mute */
   function toggleMute() {
     isMuted = !isMuted;
-    video.muted = isMuted;
+    activeVideo.muted = isMuted;
+    preloadVideo.muted = isMuted;
     muteBtn.textContent = isMuted ? "🔇" : "🔊";
   }
 
-  /* Load playlists */
   fetch("videos.json")
     .then(res => res.json())
     .then(data => {
@@ -101,30 +111,57 @@
       }
 
       currentPlaylist = playlists[category];
-      playCurrent();
+      loadInitial();
       enableSwipe();
     });
 
-  function playCurrent() {
-    video.src = currentPlaylist[currentIndex];
-    video.loop = true;
-    video.muted = isMuted;
+  function loadInitial() {
+    activeVideo.src = currentPlaylist[currentIndex];
+    activeVideo.muted = isMuted;
+    activeVideo.play();
 
-    video.play().catch(() => {});
+    preloadNext();
+  }
+
+  function preloadNext() {
+    const nextIndex = (currentIndex + 1) % currentPlaylist.length;
+    preloadVideo.src = currentPlaylist[nextIndex];
+    preloadVideo.muted = isMuted;
+    preloadVideo.load();
+  }
+
+  function swapVideos(nextIndex) {
+    currentIndex = nextIndex;
+
+    // swap roles
+    [activeVideo, preloadVideo] = [preloadVideo, activeVideo];
+
+    activeVideo.classList.remove("hidden");
+    activeVideo.classList.add("visible");
+    preloadVideo.classList.remove("visible");
+    preloadVideo.classList.add("hidden");
+
+    activeVideo.play();
+    preloadNext();
   }
 
   function nextVideo() {
-    currentIndex = (currentIndex + 1) % currentPlaylist.length;
-    playCurrent();
+    const nextIndex = (currentIndex + 1) % currentPlaylist.length;
+    swapVideos(nextIndex);
   }
 
   function prevVideo() {
-    currentIndex =
+    const prevIndex =
       (currentIndex - 1 + currentPlaylist.length) % currentPlaylist.length;
-    playCurrent();
+
+    // preload previous instead
+    preloadVideo.src = currentPlaylist[prevIndex];
+    preloadVideo.muted = isMuted;
+    preloadVideo.load();
+
+    swapVideos(prevIndex);
   }
 
-  /* Swipe navigation */
   function enableSwipe() {
     document.addEventListener("touchstart", e => {
       startY = e.touches[0].clientY;
@@ -134,8 +171,8 @@
       const endY = e.changedTouches[0].clientY;
       const delta = startY - endY;
 
-      if (delta > 80) nextVideo();   // swipe up
-      if (delta < -80) prevVideo();  // swipe down
+      if (delta > 80) nextVideo();
+      if (delta < -80) prevVideo();
     });
   }
 </script>
