@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Benestar Shorts</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background: black;
+      color: white;
+      text-align: center;
+    }
+
+    h1 {
+      padding: 20px 0;
+    }
+
+    .categories {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      padding: 20px;
+    }
+
+    .category-btn {
+      position: relative;
+      height: 140px;
+      border-radius: 14px;
+      overflow: hidden;
+      cursor: pointer;
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      font-weight: bold;
+    }
+
+    #player {
+      width: 100vw;
+      height: 100vh;
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>Benestar Shorts</h1>
+
+<div class="categories" id="categories">
+  <div class="category-btn" onclick="startPlaylist('https://www.youtube.com/playlist?list=PL-oGuMliuWUQuTHTcgkWhMU9c6jQEiNzp')" style="background:#1e3c72">
+    La mar
+  </div>
+  <div class="category-btn" onclick="startPlaylist('https://www.youtube.com/playlist?list=PL-oGuMliuWUQuTHTcgkWhMU9c6jQEiNzp')" style="background:#8e2de2">
+    Amor
+  </div>
+  <div class="category-btn" onclick="startPlaylist('https://www.youtube.com/playlist?list=PL-oGuMliuWUQuTHTcgkWhMU9c6jQEiNzp')" style="background:#2ecc71">
+    Natura
+  </div>
+  <div class="category-btn" onclick="startPlaylist('https://www.youtube.com/playlist?list=PL-oGuMliuWUQuTHTcgkWhMU9c6jQEiNzp')" style="background:#f39c12">
+    Motivació
+  </div>
+</div>
+
+<div id="player"></div>
+
+<!-- YouTube IFrame API -->
+<script src="https://www.youtube.com/iframe_api"></script>
+
+<script>
+  let player;
+  let startY = 0;
+
+  function onYouTubeIframeAPIReady() {}
+
+  function startPlaylist(playlistId) {
+    document.getElementById('categories').style.display = 'none';
+    document.getElementById('player').style.display = 'block';
+
+    player = new YT.Player('player', {
+      playerVars: {
+        listType: 'playlist',
+        list: playlistId,
+        autoplay: 1,
+        controls: 0,
+        modestbranding: 1,
+        loop: 1,
+        playsinline: 1
+      },
+      events: {
+        onReady: e => e.target.playVideo(),
+        onStateChange: onPlayerStateChange
+      }
+    });
+
+    enableSwipe();
+  }
+
+  // Loop same video forever
+  function onPlayerStateChange(event) {
+    if (event.data === YT.PlayerState.ENDED) {
+      player.playVideo();
+    }
+  }
+
+  // Swipe down → next video
+  function enableSwipe() {
+    document.addEventListener('touchstart', e => {
+      startY = e.touches[0].clientY;
+    });
+
+    document.addEventListener('touchend', e => {
+      let endY = e.changedTouches[0].clientY;
+      if (startY - endY < -80) {
+        player.nextVideo();
+      }
+    });
+  }
+</script>
+
+</body>
+</html>
