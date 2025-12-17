@@ -30,34 +30,16 @@
       cursor: pointer;
       user-select: none;
     }
-
-    .mute {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 10;
-      font-size: 26px;
-      color: white;
-      cursor: pointer;
-      user-select: none;
-      background: rgba(0,0,0,0.4);
-      border-radius: 50%;
-      padding: 12px;
-    }
   </style>
 </head>
 
 <body>
 
 <div class="back" onclick="goBack()">←</div>
-<div class="mute" onclick="toggleMute()">🔇</div>
-
-<video id="videoPlayer" autoplay muted playsinline></video>
+<video id="videoPlayer" playsinline loop></video>
 
 <script>
   const video = document.getElementById("videoPlayer");
-  const muteBtn = document.querySelector(".mute");
-
   let playlists = {};
   let currentPlaylist = [];
   let currentIndex = 0;
@@ -68,11 +50,6 @@
 
   function goBack() {
     window.location.href = "index.html";
-  }
-
-  function toggleMute() {
-    video.muted = !video.muted;
-    muteBtn.textContent = video.muted ? "🔇" : "🔊";
   }
 
   fetch("videos.json")
@@ -94,6 +71,8 @@
   function playCurrent() {
     video.src = currentPlaylist[currentIndex];
     video.loop = true;
+    video.muted = false;
+
     video.play().catch(() => {});
   }
 
@@ -117,8 +96,8 @@
       const endY = e.changedTouches[0].clientY;
       const delta = startY - endY;
 
-      if (delta > 80) nextVideo();   // swipe up
-      if (delta < -80) prevVideo();  // swipe down
+      if (delta > 80) nextVideo();
+      if (delta < -80) prevVideo();
     });
   }
 </script>
