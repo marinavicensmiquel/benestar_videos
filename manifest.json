@@ -1,20 +1,19 @@
 {
-  "name": "Benestar Shorts",
+  "name": "Benestar",
   "short_name": "Benestar",
-  "start_url": "/benestar-shorts/index.html",
-  "scope": "/benestar-shorts/",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
-  "orientation": "portrait",
   "icons": [
     {
-      "src": "/benestar-shorts/icons/icon-192.png",
+      "src": "icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/benestar-shorts/icons/icon-512.png",
+      "src": "icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
