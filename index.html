@@ -71,7 +71,7 @@
 </div>
 
 <div id="playerContainer">
-  <video id="videoPlayer" autoplay muted playsinline></video>
+  <video id="videoPlayer" playsinline loop></video>
 </div>
 
 <script>
@@ -93,30 +93,31 @@
     });
 
   function startPlaylist(name) {
-    if (!playlists[name] || playlists[name].length === 0) {
-      alert("No videos in this category yet");
-      return;
-    }
-
-    currentPlaylist = playlists[name];
-    currentIndex = 0;
-
-    document.getElementById("categories").style.display = "none";
-    document.getElementById("playerContainer").style.display = "block";
-
-    playCurrent();
-    enableSwipe();
+  if (!playlists[name] || playlists[name].length === 0) {
+    alert("No videos in this category yet");
+    return;
   }
+
+  currentPlaylist = playlists[name];
+  currentIndex = 0;
+
+  document.getElementById("categories").style.display = "none";
+  document.getElementById("playerContainer").style.display = "block";
+
+  playCurrent(true);
+  enableSwipe();
+}
 
   function playCurrent() {
     video.src = currentPlaylist[currentIndex];
-    video.play();
+    video.loop = true;
+    video.muted = false;
+
+    video.play().catch(() => {
+      console.log("Playback waiting for user interaction");
+    });
   }
 
-  /* 🔁 Loop playlist */
-  video.addEventListener("ended", () => {
-    nextVideo();
-  });
 
   function nextVideo() {
     currentIndex = (currentIndex + 1) % currentPlaylist.length;
