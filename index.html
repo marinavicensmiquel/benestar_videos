@@ -8,34 +8,67 @@
   <style>
     body {
       margin: 0;
+      min-height: 100vh;
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-      background: black;
+      background: url("images/background.jpeg") no-repeat center center fixed;
+      background-size: cover;
       color: white;
       text-align: center;
     }
 
+    /* Dark overlay */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      z-index: -1;
+    }
+
     h1 {
       padding: 20px 0;
+      font-size: 2rem;
     }
 
     .categories {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 15px;
+      gap: 18px;
       padding: 20px;
     }
 
     .category-btn {
-      height: 140px;
-      border-radius: 14px;
+      position: relative;
+      height: 180px;
+      border-radius: 18px;
+      overflow: hidden;
       cursor: pointer;
+      background-size: cover;
+      background-position: center;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-size: 1.3rem;
-      font-weight: bold;
-      text-decoration: none;
-      color: white;
+      gap: 10px;
+    }
+
+    .category-btn::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+    }
+
+    .icon {
+      font-size: 3.2rem;
+      z-index: 1;
+    }
+
+    .label {
+      font-size: 1.4rem;
+      font-weight: 600;
+      z-index: 1;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.8);
     }
   </style>
 </head>
@@ -45,19 +78,42 @@
 <h1>Benestar Shorts</h1>
 
 <div class="categories">
-  <a class="category-btn" href="player.html?category=la_mar" style="background:#1e3c72">
-    La mar
-  </a>
-  <a class="category-btn" href="player.html?category=amor" style="background:#8e2de2">
-    Amor
-  </a>
-  <a class="category-btn" href="player.html?category=natura" style="background:#2ecc71">
-    Natura
-  </a>
-  <a class="category-btn" href="player.html?category=motivacio" style="background:#f39c12">
-    Motivació
-  </a>
+
+  <div class="category-btn"
+       onclick="openCategory('la_mar')"
+       style="background-image: url('images/la_mar.jpeg')">
+    <div class="icon">🌊</div>
+    <div class="label">La mar</div>
+  </div>
+
+  <div class="category-btn"
+       onclick="openCategory('amor')"
+       style="background-image: url('images/amor.jpeg')">
+    <div class="icon">❤️</div>
+    <div class="label">Amor</div>
+  </div>
+
+  <div class="category-btn"
+       onclick="openCategory('natura')"
+       style="background-image: url('images/natura.jpeg')">
+    <div class="icon">🌿</div>
+    <div class="label">Natura</div>
+  </div>
+
+  <div class="category-btn"
+       onclick="openCategory('motivacio')"
+       style="background-image: url('images/motivacio.jpeg')">
+    <div class="icon">✨</div>
+    <div class="label">Motivació</div>
+  </div>
+
 </div>
+
+<script>
+  function openCategory(category) {
+    window.location.href = `player.html?category=${category}`;
+  }
+</script>
 
 </body>
 </html>
