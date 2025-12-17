@@ -14,22 +14,10 @@
     }
 
     video {
-      position: fixed;
-      inset: 0;
       width: 100vw;
       height: 100vh;
       object-fit: cover;
       background: black;
-      transition: opacity 0.15s ease;
-    }
-
-    .hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .visible {
-      opacity: 1;
     }
 
     .back {
@@ -43,22 +31,18 @@
       user-select: none;
     }
 
-    .mute-btn {
+    .mute {
       position: fixed;
       bottom: 20px;
       right: 20px;
       z-index: 10;
       font-size: 26px;
       color: white;
-      background: rgba(0,0,0,0.5);
-      border-radius: 50%;
-      width: 48px;
-      height: 48px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       cursor: pointer;
       user-select: none;
+      background: rgba(0,0,0,0.4);
+      border-radius: 50%;
+      padding: 12px;
     }
   </style>
 </head>
@@ -66,24 +50,18 @@
 <body>
 
 <div class="back" onclick="goBack()">←</div>
-<div class="mute-btn" id="muteBtn" onclick="toggleMute()">🔇</div>
+<div class="mute" onclick="toggleMute()">🔇</div>
 
-<video id="videoA" class="visible" playsinline autoplay muted loop></video>
-<video id="videoB" class="hidden" playsinline autoplay muted loop></video>
+<video id="videoPlayer" playsinline></video>
 
 <script>
-  const videoA = document.getElementById("videoA");
-  const videoB = document.getElementById("videoB");
-  const muteBtn = document.getElementById("muteBtn");
-
-  let activeVideo = videoA;
-  let preloadVideo = videoB;
+  const video = document.getElementById("videoPlayer");
+  const muteBtn = document.querySelector(".mute");
 
   let playlists = {};
   let currentPlaylist = [];
   let currentIndex = 0;
   let startY = 0;
-  let isMuted = true;
 
   const params = new URLSearchParams(window.location.search);
   const category = params.get("category");
@@ -93,10 +71,8 @@
   }
 
   function toggleMute() {
-    isMuted = !isMuted;
-    activeVideo.muted = isMuted;
-    preloadVideo.muted = isMuted;
-    muteBtn.textContent = isMuted ? "🔇" : "🔊";
+    video.muted = !video.muted;
+    muteBtn.textContent = video.muted ? "🔇" : "🔊";
   }
 
   fetch("videos.json")
@@ -111,55 +87,33 @@
       }
 
       currentPlaylist = playlists[category];
-      loadInitial();
+      startPlayback();
       enableSwipe();
     });
 
-  function loadInitial() {
-    activeVideo.src = currentPlaylist[currentIndex];
-    activeVideo.muted = isMuted;
-    activeVideo.play();
+  /* 🔊 PERFECTLY SYNCED PLAY */
+  function startPlayback() {
+    video.pause();
+    video.currentTime = 0;
+    video.src = currentPlaylist[currentIndex];
+    video.muted = true;     // start muted
+    video.loop = true;
+    video.load();
 
-    preloadNext();
-  }
-
-  function preloadNext() {
-    const nextIndex = (currentIndex + 1) % currentPlaylist.length;
-    preloadVideo.src = currentPlaylist[nextIndex];
-    preloadVideo.muted = isMuted;
-    preloadVideo.load();
-  }
-
-  function swapVideos(nextIndex) {
-    currentIndex = nextIndex;
-
-    // swap roles
-    [activeVideo, preloadVideo] = [preloadVideo, activeVideo];
-
-    activeVideo.classList.remove("hidden");
-    activeVideo.classList.add("visible");
-    preloadVideo.classList.remove("visible");
-    preloadVideo.classList.add("hidden");
-
-    activeVideo.play();
-    preloadNext();
+    video.oncanplay = () => {
+      video.play().catch(() => {});
+    };
   }
 
   function nextVideo() {
-    const nextIndex = (currentIndex + 1) % currentPlaylist.length;
-    swapVideos(nextIndex);
+    currentIndex = (currentIndex + 1) % currentPlaylist.length;
+    startPlayback();
   }
 
   function prevVideo() {
-    const prevIndex =
+    currentIndex =
       (currentIndex - 1 + currentPlaylist.length) % currentPlaylist.length;
-
-    // preload previous instead
-    preloadVideo.src = currentPlaylist[prevIndex];
-    preloadVideo.muted = isMuted;
-    preloadVideo.load();
-
-    swapVideos(prevIndex);
+    startPlayback();
   }
 
   function enableSwipe() {
