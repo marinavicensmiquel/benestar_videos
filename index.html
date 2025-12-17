@@ -34,19 +34,8 @@
       justify-content: center;
       font-size: 1.3rem;
       font-weight: bold;
-    }
-
-    #playerContainer {
-      display: none;
-      width: 100vw;
-      height: 100vh;
-    }
-
-    video {
-      width: 100vw;
-      height: 100vh;
-      object-fit: cover;
-      background: black;
+      text-decoration: none;
+      color: white;
     }
   </style>
 </head>
@@ -55,97 +44,20 @@
 
 <h1>Benestar Shorts</h1>
 
-<div class="categories" id="categories">
-  <div class="category-btn" onclick="startPlaylist('la_mar')" style="background:#1e3c72">
+<div class="categories">
+  <a class="category-btn" href="player.html?category=la_mar" style="background:#1e3c72">
     La mar
-  </div>
-  <div class="category-btn" onclick="startPlaylist('amor')" style="background:#8e2de2">
+  </a>
+  <a class="category-btn" href="player.html?category=amor" style="background:#8e2de2">
     Amor
-  </div>
-  <div class="category-btn" onclick="startPlaylist('natura')" style="background:#2ecc71">
+  </a>
+  <a class="category-btn" href="player.html?category=natura" style="background:#2ecc71">
     Natura
-  </div>
-  <div class="category-btn" onclick="startPlaylist('motivacio')" style="background:#f39c12">
+  </a>
+  <a class="category-btn" href="player.html?category=motivacio" style="background:#f39c12">
     Motivació
-  </div>
+  </a>
 </div>
-
-<div id="playerContainer">
-  <video id="videoPlayer" playsinline loop></video>
-</div>
-
-<script>
-  let playlists = {};
-  let currentPlaylist = [];
-  let currentIndex = 0;
-  let startY = 0;
-
-  const video = document.getElementById("videoPlayer");
-
-  /* 📥 Load playlists from videos.json */
-  fetch("videos.json")
-    .then(res => res.json())
-    .then(data => {
-      playlists = data;
-    })
-    .catch(err => {
-      console.error("Error loading videos.json", err);
-    });
-
-  function startPlaylist(name) {
-  if (!playlists[name] || playlists[name].length === 0) {
-    alert("No videos in this category yet");
-    return;
-  }
-
-  currentPlaylist = playlists[name];
-  currentIndex = 0;
-
-  document.getElementById("categories").style.display = "none";
-  document.getElementById("playerContainer").style.display = "block";
-
-  playCurrent(true);
-  enableSwipe();
-}
-
-  function playCurrent() {
-    video.src = currentPlaylist[currentIndex];
-    video.loop = true;
-    video.muted = false;
-
-    video.play().catch(() => {
-      console.log("Playback waiting for user interaction");
-    });
-  }
-
-
-  function nextVideo() {
-    currentIndex = (currentIndex + 1) % currentPlaylist.length;
-    playCurrent();
-  }
-
-  function prevVideo() {
-    currentIndex =
-      (currentIndex - 1 + currentPlaylist.length) % currentPlaylist.length;
-    playCurrent();
-  }
-
-  /* 📱 Swipe gestures */
-  function enableSwipe() {
-    document.addEventListener("touchstart", e => {
-      startY = e.touches[0].clientY;
-    });
-
-    document.addEventListener("touchend", e => {
-      const endY = e.changedTouches[0].clientY;
-      const delta = startY - endY;
-
-      if (delta > 80) nextVideo();   // swipe up
-      if (delta < -80) prevVideo();  // swipe down
-    });
-  }
-</script>
-
 
 </body>
 </html>

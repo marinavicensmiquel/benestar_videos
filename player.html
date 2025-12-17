@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Benestar Shorts</title>
+
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    video {
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      background: black;
+    }
+
+    .back {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 10;
+      font-size: 28px;
+      color: white;
+      cursor: pointer;
+      user-select: none;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="back" onclick="goBack()">←</div>
+<video id="videoPlayer" playsinline loop></video>
+
+<script>
+  const video = document.getElementById("videoPlayer");
+  let playlists = {};
+  let currentPlaylist = [];
+  let currentIndex = 0;
+  let startY = 0;
+
+  const params = new URLSearchParams(window.location.search);
+  const category = params.get("category");
+
+  function goBack() {
+    window.location.href = "index.html";
+  }
+
+  fetch("videos.json")
+    .then(res => res.json())
+    .then(data => {
+      playlists = data;
+
+      if (!category || !playlists[category]) {
+        alert("Category not found");
+        goBack();
+        return;
+      }
+
+      currentPlaylist = playlists[category];
+      playCurrent();
+      enableSwipe();
+    });
+
+  function playCurrent() {
+    video.src = currentPlaylist[currentIndex];
+    video.loop = true;
+    video.muted = false;
+
+    video.play().catch(() => {});
+  }
+
+  function nextVideo() {
+    currentIndex = (currentIndex + 1) % currentPlaylist.length;
+    playCurrent();
+  }
+
+  function prevVideo() {
+    currentIndex =
+      (currentIndex - 1 + currentPlaylist.length) % currentPlaylist.length;
+    playCurrent();
+  }
+
+  function enableSwipe() {
+    document.addEventListener("touchstart", e => {
+      startY = e.touches[0].clientY;
+    });
+
+    document.addEventListener("touchend", e => {
+      const endY = e.changedTouches[0].clientY;
+      const delta = startY - endY;
+
+      if (delta > 80) nextVideo();
+      if (delta < -80) prevVideo();
+    });
+  }
+</script>
+
+</body>
+</html>
