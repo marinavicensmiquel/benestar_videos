@@ -26,13 +26,9 @@
     }
 
     .category-btn {
-      position: relative;
       height: 140px;
       border-radius: 14px;
-      overflow: hidden;
       cursor: pointer;
-      background-size: cover;
-      background-position: center;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -40,10 +36,17 @@
       font-weight: bold;
     }
 
-    #player {
+    #playerContainer {
+      display: none;
       width: 100vw;
       height: 100vh;
-      display: none;
+    }
+
+    video {
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      background: black;
     }
   </style>
 </head>
@@ -53,76 +56,95 @@
 <h1>Benestar Shorts</h1>
 
 <div class="categories" id="categories">
-  <div class="category-btn" onclick="startPlaylist('oGuMliuWUQuTHTcgkWhMU9c6jQEiNzp')" style="background:#1e3c72">
+  <div class="category-btn" onclick="startPlaylist('la_mar')" style="background:#1e3c72">
     La mar
   </div>
-  <div class="category-btn" onclick="startPlaylist('oGuMliuWUQuTHTcgkWhMU9c6jQEiNzp')" style="background:#8e2de2">
+  <div class="category-btn" onclick="startPlaylist('amor')" style="background:#8e2de2">
     Amor
   </div>
-  <div class="category-btn" onclick="startPlaylist('oGuMliuWUQuTHTcgkWhMU9c6jQEiNzp')" style="background:#2ecc71">
+  <div class="category-btn" onclick="startPlaylist('natura')" style="background:#2ecc71">
     Natura
   </div>
-  <div class="category-btn" onclick="startPlaylist('oGuMliuWUQuTHTcgkWhMU9c6jQEiNzp')" style="background:#f39c12">
+  <div class="category-btn" onclick="startPlaylist('motivacio')" style="background:#f39c12">
     Motivació
   </div>
 </div>
 
-<div id="player"></div>
-
-<!-- YouTube IFrame API -->
-<script src="https://www.youtube.com/iframe_api"></script>
+<div id="playerContainer">
+  <video id="videoPlayer" autoplay muted playsinline></video>
+</div>
 
 <script>
-  let player;
+  let playlists = {};
+  let currentPlaylist = [];
+  let currentIndex = 0;
   let startY = 0;
 
-  function onYouTubeIframeAPIReady() {}
+  const video = document.getElementById("videoPlayer");
 
-  function startPlaylist(playlistId) {
-    document.getElementById('categories').style.display = 'none';
-    document.getElementById('player').style.display = 'block';
-
-    player = new YT.Player('player', {
-      playerVars: {
-        listType: 'playlist',
-        list: playlistId,
-        autoplay: 1,
-        controls: 0,
-        modestbranding: 1,
-        loop: 1,
-        playsinline: 1,
-        origin: 'https://marinavicensmiquel.github.io'
-      },
-      events: {
-        onReady: e => e.target.playVideo(),
-        onStateChange: onPlayerStateChange
-      }
+  /* 📥 Load playlists from videos.json */
+  fetch("videos.json")
+    .then(res => res.json())
+    .then(data => {
+      playlists = data;
+    })
+    .catch(err => {
+      console.error("Error loading videos.json", err);
     });
 
+  function startPlaylist(name) {
+    if (!playlists[name] || playlists[name].length === 0) {
+      alert("No videos in this category yet");
+      return;
+    }
+
+    currentPlaylist = playlists[name];
+    currentIndex = 0;
+
+    document.getElementById("categories").style.display = "none";
+    document.getElementById("playerContainer").style.display = "block";
+
+    playCurrent();
     enableSwipe();
   }
 
-  // Loop same video forever
-  function onPlayerStateChange(event) {
-    if (event.data === YT.PlayerState.ENDED) {
-      player.playVideo();
-    }
+  function playCurrent() {
+    video.src = currentPlaylist[currentIndex];
+    video.play();
   }
 
-  // Swipe down → next video
+  /* 🔁 Loop playlist */
+  video.addEventListener("ended", () => {
+    nextVideo();
+  });
+
+  function nextVideo() {
+    currentIndex = (currentIndex + 1) % currentPlaylist.length;
+    playCurrent();
+  }
+
+  function prevVideo() {
+    currentIndex =
+      (currentIndex - 1 + currentPlaylist.length) % currentPlaylist.length;
+    playCurrent();
+  }
+
+  /* 📱 Swipe gestures */
   function enableSwipe() {
-    document.addEventListener('touchstart', e => {
+    document.addEventListener("touchstart", e => {
       startY = e.touches[0].clientY;
     });
 
-    document.addEventListener('touchend', e => {
-      let endY = e.changedTouches[0].clientY;
-      if (startY - endY < -80) {
-        player.nextVideo();
-      }
+    document.addEventListener("touchend", e => {
+      const endY = e.changedTouches[0].clientY;
+      const delta = startY - endY;
+
+      if (delta > 80) nextVideo();   // swipe up
+      if (delta < -80) prevVideo();  // swipe down
     });
   }
 </script>
+
 
 </body>
 </html>
