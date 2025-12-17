@@ -52,7 +52,7 @@
 <div class="back" onclick="goBack()">←</div>
 <div class="mute" onclick="toggleMute()">🔇</div>
 
-<video id="videoPlayer" playsinline></video>
+<video id="videoPlayer" autoplay muted playsinline></video>
 
 <script>
   const video = document.getElementById("videoPlayer");
@@ -87,33 +87,25 @@
       }
 
       currentPlaylist = playlists[category];
-      startPlayback();
+      playCurrent();
       enableSwipe();
     });
 
-  /* 🔊 PERFECTLY SYNCED PLAY */
-  function startPlayback() {
-    video.pause();
-    video.currentTime = 0;
+  function playCurrent() {
     video.src = currentPlaylist[currentIndex];
-    video.muted = true;     // start muted
     video.loop = true;
-    video.load();
-
-    video.oncanplay = () => {
-      video.play().catch(() => {});
-    };
+    video.play().catch(() => {});
   }
 
   function nextVideo() {
     currentIndex = (currentIndex + 1) % currentPlaylist.length;
-    startPlayback();
+    playCurrent();
   }
 
   function prevVideo() {
     currentIndex =
       (currentIndex - 1 + currentPlaylist.length) % currentPlaylist.length;
-    startPlayback();
+    playCurrent();
   }
 
   function enableSwipe() {
@@ -125,8 +117,8 @@
       const endY = e.changedTouches[0].clientY;
       const delta = startY - endY;
 
-      if (delta > 80) nextVideo();
-      if (delta < -80) prevVideo();
+      if (delta > 80) nextVideo();   // swipe up
+      if (delta < -80) prevVideo();  // swipe down
     });
   }
 </script>
