@@ -80,7 +80,7 @@
   const category = params.get("category");
 
   function goBack() {
-    window.location.href = `player.html?category=${category}`;
+    window.location.replace("./index.html");
   }
 
   function toggleMute() {
@@ -88,21 +88,37 @@
     muteBtn.textContent = video.muted ? "🔇" : "🔊";
   }
 
-  fetch("videos.json")
+  fetch("./videos.json")
     .then(res => res.json())
     .then(data => {
       playlists = data;
 
-      if (!category || !playlists[category]) {
-        alert("Category not found");
-        goBack();
+      // ❌ Invalid entry → return to main app screen
+      if (!category || !playlists[category] || playlists[category].length === 0) {
+        console.warn("Invalid or empty category:", category);
+
+        // Small delay improves Safari reliability in PWAs
+        setTimeout(() => {
+          goBack();
+        }, 50);
+
         return;
       }
 
+      // ✅ Valid playlist
       currentPlaylist = playlists[category];
       playCurrent();
       enableSwipe();
+    })
+    .catch(err => {
+      console.error("Failed to load videos.json", err);
+
+      // Fallback to main page if JSON fails
+      setTimeout(() => {
+        goBack();
+      }, 50);
     });
+
 
   function playCurrent() {
     video.src = currentPlaylist[currentIndex];
